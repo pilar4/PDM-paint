@@ -3,6 +3,7 @@ from PyQt6.QtGui import QPainter, QPen, QColor, QFont, QPixmap, QPainterPath
 from PyQt6.QtCore import QRectF, QLineF, Qt
 import PyQt6.QtGui as QtGui
 import sys
+from src.calculate_points import draw_to_pdm
 
 width = 1920
 height = 1080
@@ -145,7 +146,13 @@ class MainWindow(PaintBase):
         # Draw the canvases
         painter.drawPixmap(0, 0, self.canvas_euler)
         painter.drawPixmap(0, 0, self.canvas_pdm)
+
+        draw_to_pdm(painter, euler_points(), shift=960)
+
         painter.end()
+
+
+
 
 
 
@@ -159,8 +166,8 @@ def draw():
     app.exec()
 
 
-def data():
-    return window
 
-
-
+def euler_points():
+    return window.euler_points
+def pdm_points():
+    return window.pdm_points
