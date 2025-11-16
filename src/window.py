@@ -2,8 +2,10 @@ from PyQt6.QtWidgets import QApplication, QWidget
 from PyQt6.QtGui import QPainter, QPen, QColor, QFont, QPixmap, QPainterPath
 from PyQt6.QtCore import QRectF, QLineF, Qt
 import PyQt6.QtGui as QtGui
+import PyQt6.QtCore as QtCore
 import sys
 from src.calculate_points import draw_to_pdm
+from src.calculate_points import points_to_pdm
 
 width = 1920
 height = 1080
@@ -55,18 +57,22 @@ class MainWindow(PaintBase):
         )
 
         # Store all drawn points here
-        self.euler_points = []  # [(x1, y1), (x2, y2), ...]
-        self.pdm_points = []    # same for the right circle
+        self.euler_points = []            # drag points
+        self.pdm_points = []
+
+        # Store click points here
+        self.euler_click_points = []      # NEW
+        self.pdm_click_points = []        # NEW
 
     # ------------------------------
     # Mouse handling
     # ------------------------------
     def mouseMoveEvent(self, e):
-        x, y = e.position().x(), e.position().y()
-
-        if self.last_x is None:
-            self.last_x, self.last_y = x, y
+        # Only draw when dragging
+        if not (e.buttons() & Qt.MouseButton.LeftButton):
             return
+
+        x, y = e.position().x(), e.position().y()
 
         # Determine drawing target
         if self.euler_path.contains(e.position()):
@@ -76,19 +82,47 @@ class MainWindow(PaintBase):
             target_canvas = self.canvas_pdm
             points_list = self.pdm_points
         else:
-            self.last_x, self.last_y = x, y
             return
 
-        # All points list
+        # Save drag point
         points_list.append((x, y))
 
-        # Draw line
+        # Draw a dot (not a line)
         painter = QtGui.QPainter(target_canvas)
         painter.setPen(BLACK_PEN)
-        painter.drawLine(QLineF(self.last_x, self.last_y, x, y))
+        r = BLACK_PEN.width() / 2
+        painter.drawEllipse(QtCore.QPointF(x, y), r, r)
         painter.end()
 
-        self.last_x, self.last_y = x, y
+        self.update()
+
+    def mousePressEvent(self, e):
+        # Only respond to RIGHT click (as in your last code)
+        if e.button() != Qt.MouseButton.RightButton:
+            return
+
+        x, y = e.position().x(), e.position().y()
+
+        # Determine drawing target
+        if self.euler_path.contains(e.position()):
+            target_canvas = self.canvas_euler
+            points_list = self.euler_click_points   # NEW
+        elif self.pdm_path.contains(e.position()):
+            target_canvas = self.canvas_pdm
+            points_list = self.pdm_click_points     # NEW
+        else:
+            return
+
+        # Save click point
+        points_list.append((x, y))
+
+        # Draw dot
+        painter = QtGui.QPainter(target_canvas)
+        painter.setPen(BLACK_PEN)
+        r = BLACK_PEN.width()
+        painter.drawPoint(QtCore.QPointF(x, y))
+        painter.end()
+
         self.update()
 
     def mouseReleaseEvent(self, e):
@@ -147,27 +181,30 @@ class MainWindow(PaintBase):
         painter.drawPixmap(0, 0, self.canvas_euler)
         painter.drawPixmap(0, 0, self.canvas_pdm)
 
+        # Map Euclidean drag points to Poincaré (unchanged)
         draw_to_pdm(painter, euler_points(), shift=960)
+        points_to_pdm(painter, euler_click_points(), shift=960)
 
         painter.end()
-
-
-
-
 
 
 app = QApplication(sys.argv)
 window = MainWindow()
 
 def draw():
-
     window.resize(width, height)
     window.show()
     app.exec()
 
-
-
 def euler_points():
     return window.euler_points
+
 def pdm_points():
     return window.pdm_points
+
+# Optional: access click points externally
+def euler_click_points():
+    return window.euler_click_points
+
+def pdm_click_points():
+    return window.pdm_click_points
