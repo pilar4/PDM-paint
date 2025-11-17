@@ -14,6 +14,12 @@ def main():
     print()
     print(pdm_points)
 
+    e_points_click = window.euler_click_points()
+    pdm_points_click = window.pdm_click_points()
+    print("Euler Click Points:")
+    print(e_points_click)
+    print("PDM Click Points:")
+    print(pdm_points_click)
 
 
 if __name__ == '__main__':
