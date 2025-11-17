@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QApplication, QWidget
 from PyQt6.QtGui import QPainter, QPen, QColor, QFont, QPixmap, QPainterPath
-from PyQt6.QtCore import QRectF, QLineF, Qt
+from PyQt6.QtCore import QRectF, QLineF, Qt, QPointF
 import PyQt6.QtGui as QtGui
 import PyQt6.QtCore as QtCore
 import sys
@@ -97,7 +97,7 @@ class MainWindow(PaintBase):
         self.update()
 
     def mousePressEvent(self, e):
-        # Only respond to RIGHT click (as in your last code)
+        # Only respond to RIGHT-click (as in your last code)
         if e.button() != Qt.MouseButton.RightButton:
             return
 
@@ -183,7 +183,13 @@ class MainWindow(PaintBase):
 
         # Map Euclidean drag points to Poincaré (unchanged)
         draw_to_pdm(painter, euler_points(), shift=960)
-        points_to_pdm(painter, euler_click_points(), shift=960)
+        points_to_pdm(
+            painter,
+            euler_click_points(),
+            shift=960,
+            center=self.euler_center,
+            radius=self.radius / 2
+        )
 
         painter.end()
 
