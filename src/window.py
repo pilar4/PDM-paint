@@ -61,8 +61,8 @@ class MainWindow(PaintBase):
         self.pdm_points = []
 
         # Store click points here
-        self.euler_click_points = []      # NEW
-        self.pdm_click_points = []        # NEW
+        self.euler_click_points = []
+        self.pdm_click_points = []
 
     # ------------------------------
     # Mouse handling
@@ -143,6 +143,9 @@ class MainWindow(PaintBase):
         painter.setFont(QFont("Consolas", text_size))
         text_rect = QRectF(x, y - (height / 12), radius, text_size * 2)
         painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, "Euclidean plane")
+        rc = QRectF(x, y - (height / 12), radius*2.2, text_size)
+        # painter.drawText(rc, Qt.AlignmentFlag.AlignCenter, "(press right click)")
+
 
         # circle + square
         circle_rect = QRectF(x, y, radius, radius)
@@ -208,7 +211,7 @@ def euler_points():
 def pdm_points():
     return window.pdm_points
 
-# Optional: access click points externally
+# troubleshooting
 def euler_click_points():
     return window.euler_click_points
 
